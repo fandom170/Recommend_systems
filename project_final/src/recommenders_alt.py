@@ -90,11 +90,12 @@ class alt_recommender:
     def get_own_recommendations(self, user, N=5):
         res = [self.id_to_itemid[rec[0]] for rec in
                self.own_recommender.recommend(userid=self.userid_to_id[user],
-                                    user_items=csr_matrix(self.user_item_matrix).tocsr(),  # на вход user-item matrix
-                                    N=N,
-                                    filter_already_liked_items=False,
-                                    filter_items=[self.itemid_to_id[999999]],  # !!!
-                                    recalculate_user=True)]
+                                              user_items=csr_matrix(self.user_item_matrix).tocsr(),
+                                              # на вход user-item matrix
+                                              N=N,
+                                              filter_already_liked_items=False,
+                                              filter_items=[self.itemid_to_id[999999]],  # !!!
+                                              recalculate_user=True)]
         return res
 
     def fit_own_recommender(self):
@@ -105,12 +106,16 @@ class alt_recommender:
 
     def get_als_recommendations(self, user, N=5):
         """Рекомендации через стардартные библиотеки implicit"""
-        # self.update_dict(user_id=user)
-        return self.get_recommendations(user, N=N)
+        #self.update_dict(user_id=user)
+        try:
+            return self.get_recommendations(user, N=N)
+        except:
+            return None
+
 
     def get_own_recommendations(self, user, N=5):
         """Рекомендуем товары среди тех, которые юзер уже купил"""
-        #self._update_dict(user_id=user)
+        # self._update_dict(user_id=user)
         return self.get_own_recommendations(user, N=N)
 
     def get_similar_items_recommendation(self, user, N=5):
@@ -155,12 +160,6 @@ class alt_recommender:
         assert len(res) == N, 'Количество рекомендаций != {}'.format(N)
         return res
 
-
-
-
-
-
-
     def get_predictions(self, data):
         pass
 
@@ -176,15 +175,6 @@ class alt_recommender:
 
 
 '''
-
-        self.user_item_matrix = self._prepare_matrix(data)  # pd.DataFrame
-        self.id_to_itemid, self.id_to_userid, \
-        self.itemid_to_id, self.userid_to_id = self._prepare_dicts(self.user_item_matrix)
-
-
-
-        self.model = self.fit(self.user_item_matrix)
-
 
     def _get_recommendations(self, user, model, N=5):
         """Рекомендации через стардартные библиотеки implicit"""
@@ -202,19 +192,5 @@ class alt_recommender:
 
         assert len(res) == N, 'Количество рекомендаций != {}'.format(N)
         return res
-
-
-
-    def get_similar_items_recommendation(self, user, N=5):
-        """Рекомендуем товары, похожие на топ-N купленных юзером товаров"""
-
-        top_users_purchases = self.top_purchases[self.top_purchases['user_id'] == user].head(N)
-
-        res = top_users_purchases['item_id'].apply(lambda x: self._get_similar_item(x)).tolist()
-        res = self._extend_with_top_popular(res, N=N)
-
-        assert len(res) == N, 'Количество рекомендаций != {}'.format(N)
-        return res
-
 
 '''
